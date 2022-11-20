@@ -4,13 +4,15 @@ from bs4 import BeautifulSoup
 import zipfile
 from pprint import pprint
 import csv
+import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
     print("Start")
 
-    # mainPath = "/home/flippi/Desktop/testSeason"
-    mainPath = input("Input data path: ")
-    year = input("Input season year: ")
+    mainPath = "/home/flippi/Desktop/Saison_22_23"
+    # mainPath = input("Input data path: ")
+    # year = input("Input season year: ")
+    year = "22_23"
     print(mainPath)
 
     dataPath = os.path.join(mainPath, 'data')
@@ -38,28 +40,66 @@ if __name__ == '__main__':
     pprint(os.listdir(dataPath))
 
     elimList = []
+    teams = {}
 
     for file in os.listdir(dataPath):
-        with open(os.path.join(dataPath, file),'r') as f:
+        with open(os.path.join(dataPath, file), 'r') as f:
             content = f.read()
-
+        unique_elim = []
         soup = BeautifulSoup(content, "xml")
         unique_name = soup.find('name').text
 
-        unique_elim = soup.find_all('Result', {"state": "1"})
+        chuTeams = soup.find_all("abbreviation")
 
-        print(unique_name)
-        print(len(unique_elim))
+        for chuTeam in chuTeams:
+            if chuTeam.text not in teams:
+                teams[chuTeam.text] = 0
+
+        rides = soup.find_all('Ride')
+
+        for ride in rides:
+            sample = ride.findChild('Result', {"state": "1"})
+            if sample is not None:
+                unique_elim.append(ride)
+
+        for elim in unique_elim:
+            riderNo = elim.get("rider")
+            riderNo = riderNo.strip()
+            print(riderNo)
+            eRider = soup.find("Rider", {"bootNo": riderNo})
+            ridersTeam = eRider.parent.parent.abbreviation.text
+            print(ridersTeam)
+
+            teams[ridersTeam] += 1
+
+        pprint(unique_elim)
+
+        print(unique_name + "\tElims: " + str(len(unique_elim)))
 
         elims = (unique_name, len(unique_elim))
         elimList.append(elims)
 
     pprint(elimList)
+    pprint(teams)
 
-    exportName = year + "-elims.csv"
+    # team_names, team_values = zip(*teams.items())
+    # plt.figure(figsize=(len(teams)/2, 10))
+    # plt.bar(team_names, team_values)
+    # plt.xticks(rotation='vertical')
+    # plt.show()
+
+    exportName = year + "-elimsPerCHU.csv"
     exportPath = os.path.join(mainPath, exportName)
 
     with open(exportPath, 'w', newline='\n') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         for item in elimList:
             writer.writerow(item)
+
+    exportName = year + "-elimsPerTeam.csv"
+    exportPath = os.path.join(mainPath, exportName)
+
+    with open(exportPath, 'w', newline='\n') as csvfile:
+        fields = ['Team', 'Eliminations']
+        writer = csv.writer(csvfile, delimiter=',')
+        writer.writerows(teams.items())
