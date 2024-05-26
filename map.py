@@ -8,7 +8,9 @@ from pathlib import Path
 if __name__ == '__main__':
     print("Start")
 
-    mainPath = Path("/home/flippi/Downloads/Saison_22_23")
+    season = "23_24"
+
+    mainPath = Path(f"/home/flippi/Desktop/Saison_{season}")
     print(mainPath)
 
     visitFilename = "VisitList.csv"
@@ -23,7 +25,7 @@ if __name__ == '__main__':
     print(np.mean(df.loc[:, 'nrchu']))
     print(np.median(df.loc[:, 'nrchu']))
 
-    gerPath = Path("/home/flippi/Documents/chuEval/de_1.csv")
+    gerPath = Path("/home/flippi/Desktop/Saison_23_24/de_1.csv")
 
     ger = pd.read_csv(gerPath)
     print(ger.head())
@@ -66,7 +68,7 @@ if __name__ == '__main__':
         df[col + '_lat_lng'] = lat_lon_list
 
     pprint(df)
-    df.to_csv("./eval.csv")
+    df.to_csv(f"./eval_{season}.csv")
     # create a dictionary that maps each origin to a unique color
     origins = merged_df['origin'].unique()
     color_map = plt.cm.get_cmap('tab20', len(origins))
@@ -87,7 +89,8 @@ if __name__ == '__main__':
         else:
             print(f"{col_lat_lon} not found in df.columns")
 
-    fig.savefig('visits.png', dpi=1200)
+    plt.title(f"Saison: {season}")
+    fig.savefig(f'visits_{season}.png', dpi=1200)
 
     # plt.show()
     plt.close(fig)
