@@ -90,7 +90,7 @@ if __name__ == '__main__':
             print(f"{col_lat_lon} not found in df.columns")
 
     plt.title(f"Saison: {season}")
-    fig.savefig(f'visits_{season}.png', dpi=1200)
+    fig.savefig(f'visits_{season}.jpg', dpi=300)
 
     # plt.show()
     plt.close(fig)
